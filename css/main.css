@@ -5,6 +5,7 @@
 
 :root {
   --primary-color: #121212;
+  --primary-color-lighten: #222222;
   --secondary-color: #666666;
   --text-color: #f9f9f9;
   --text-color-alt: #666666;
@@ -124,12 +125,32 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-direction: row;
           flex-direction: row;
+  margin-bottom: 25px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
 }
 
 .detail-content--title-left {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
+  width: 70%;
+}
+
+.detail-content--title-left .ellipsis-slide {
+  overflow: hidden;
+}
+
+.detail-content--title-left .ellipsis-slide div {
+  display: inline-block;
+}
+
+.detail-content--title-left .ellipsis-slide h1 {
+  padding-right: 60px;
+}
+
+.detail-content--title-left .ellipsis-slide--loop {
+  white-space: nowrap;
+  -webkit-animation: loop-anim 25s linear infinite;
+          animation: loop-anim 25s linear infinite;
 }
 
 .detail-content--title-left .subtext {
@@ -151,6 +172,11 @@ body {
   text-decoration: none;
   color: var(--secondary-color);
   font-size: 14px;
+  width: 30%;
+}
+
+.detail-content--title-right span {
+  text-align: center;
 }
 
 .detail-content--title-right .spotify {
@@ -159,13 +185,96 @@ body {
 }
 
 .detail-content .album-info {
-  margin: 15px 0;
+  margin: 0 0 15px 0;
 }
 
 .detail-content .album-info .sub-info {
   margin-top: 5px;
   font-size: 15px;
   font-weight: 600;
+}
+
+.detail-content .track-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.detail-content .track-info--length {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  background-color: var(--primary-color-lighten);
+  border-radius: 3px;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  padding: 15px;
+  margin-right: 10px;
+  width: 100%;
+}
+
+.detail-content .track-info--popularity {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  background-color: var(--primary-color-lighten);
+  border-radius: 3px;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  padding: 15px;
+  margin-left: 10px;
+  width: 100%;
+}
+
+.detail-content .track-artists {
+  margin-top: 20px;
+}
+
+.detail-content .track-artists--artist {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+}
+
+.detail-content .track-artists--artist span {
+  color: var(--text-color-alt);
+  font-size: 16px;
+}
+
+.detail-content .track-artists--artist .artist-cover {
+  border-radius: 50%;
+  margin-bottom: 10px;
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  min-height: 90px;
 }
 
 .detail-content .album-tracks {
@@ -595,6 +704,21 @@ body {
   height: 24px;
 }
 
+.text {
+  font-size: 18px;
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+.subtext {
+  font-size: 14px;
+  color: var(--secondary-color);
+}
+
+.carousel-cell {
+  width: 33%;
+}
+
 @-webkit-keyframes clickAnim {
   from {
     -webkit-transform: scale(1);
@@ -748,6 +872,24 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+@-webkit-keyframes loop-anim {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -50%;
+  }
+}
+
+@keyframes loop-anim {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -50%;
   }
 }
 /*# sourceMappingURL=main.css.map */

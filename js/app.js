@@ -102,6 +102,21 @@ const APIController = (function() {
         return data.items;
     };
 
+    const _getArtistsOfTrack = async (token, ids) => {
+        const result = await fetch(`https://api.spotify.com/v1/artists?ids=${ids}`, {
+            method: 'GET',
+            headers: { 'Authorization' : 'Bearer ' + token }
+        });
+
+        if(result.status == 403){
+            _refreshToken(localStorage.getItem('refresh_token'));
+            _getArtistsOfTrack(token, ids);
+        }
+
+        const data = await result.json();
+        return data;
+    }
+
     // private method search track
     const _search = async (token, searchVal, type) => {
         const limit = 25;
@@ -159,6 +174,9 @@ const APIController = (function() {
         },
         getDetail(token, trackEndPoint) {
             return _getDetail(token, trackEndPoint);
+        },
+        getArtistsOfTrack(token, ids) {
+            return _getArtistsOfTrack(token, ids);
         }
     }
 
@@ -277,10 +295,14 @@ const UIController = (function(){
                 <div class="detail-banner">
                     <img class="banner-image" src="${image}" alt="banner"/>
                 </div>
-                <div id="detail-content" class="detail-content">
+                <div id="detail-content" class="detail-content"> 
                     <div class="detail-content--title">
                         <div class="detail-content--title-left">
-                            <h1>${name}</h1>
+                            <div id="outer" class="ellipsis-slide">
+                                <div>
+                                    <div id="loop" class="ellipsis-slide--loop"><div id="content"><h1>${name}</h1></div></div>
+                                </div>
+                            </div>
                             <span class="subtext">${releaseDate}</span>
                         </div>
                         <a href="${spotifyURL}" class="detail-content--title-right">
@@ -293,27 +315,44 @@ const UIController = (function(){
 
             container.insertAdjacentHTML('beforeend', html);
             container.classList.add('detail--show');
+            initEllipsisAnimation();
         },
 
-        showTrackInfo(popularity, duration){
+        showTrackInfo(popularity, duration, artists){
             const container = document.querySelector('#detail-content');
 
             let html = 
             `
-                <div class="track-info">
+                <div class="track-info-wrapper">
                     <h3>Info</h3>
-                    <div class="track-info--length">
-                        <span>${duration}</span>
-                        <span>Track Length<span>
+                    <div class="track-info">
+                        <div class="track-info--length">
+                            <span class="text">${duration}</span>
+                            <span class="subtext">Track Length<span>
+                        </div>
+                        <div class="track-info--popularity">
+                            <span class="text">${popularity}</span>
+                            <span class="subtext">0-10 Popularity<span>
+                        </div>
                     </div>
-                    <div class="track-info--popularity">
-                        <span>${popularity}</span>
-                        <span>0-10 Popularity<span>
-                    </div>
-                </div>
-            `;
+                    <h3>Artists</h3>
+                    <div class="track-artists main-carousel">`;
+                        artists.artists.forEach(function(artist){
+                            html += `
+                                <div class="track-artists--artist carousel-cell">
+                                    <img class="artist-cover" src="${artist.images[0].url}" alt="artist image"/>
+                                    <span>${artist.name}</span>
+                                </div>
+                            `;
+                        });
+            html += `</div>
+                </div>`;
+
+    
+
 
             container.insertAdjacentHTML('beforeend', html);
+            initFlickity();
         },
 
         showAlbumInfo(label, release, totalTracks, tracks, artist) {
@@ -425,13 +464,15 @@ const APPController = (function(UICtrl, APICtrl) {
         // get type
         const type = e.dataset.type;
 
-        console.log(item);
-
         // show detail page
         switch(type) {
             case 'track':
+                let ids = '';
+                item.artists.forEach(function(element){ ids += element.id + ',' });
+                ids = ids.slice(0,-1)
+                const artists = await APICtrl.getArtistsOfTrack(localStorage.getItem('access_token'), ids);
                 UICtrl.showDetailSection(item.album.images[0].url, item.name, item.album.release_date, item.uri);
-                UICtrl.showTrackInfo((item.popularity / 10), millisToMinutesAndSeconds(item.duration_ms));
+                UICtrl.showTrackInfo((item.popularity / 10), millisToMinutesAndSeconds(item.duration_ms), artists);
             break;
             case 'artist':
                 UICtrl.showDetailSection(item.images[0].url, item.name);
@@ -470,3 +511,40 @@ function hideDetail(){
     detailContainer.classList.remove("detail--show");
     detailContainer.classList.add("detail--hide");
 }
+
+function initFlickity(){
+    var elem = document.querySelector('.main-carousel');
+    var flkty = new Flickity( elem, {
+        // options
+        cellAlign: 'left',
+        freeScroll: true,
+        prevNextButtons: false,
+        pageDots: false,
+        selectedAttraction: 0.01,
+        friction: 0.15,
+        contain: true
+    });
+}
+
+function initEllipsisAnimation(){
+    let outer = document.querySelector("#outer");
+    let content = outer.querySelector('#content');
+
+    if(content.offsetWidth < outer.offsetWidth){
+        document.querySelector('.ellipsis-slide--loop').classList.remove('ellipsis-slide--loop');
+    } else {
+        repeatContent(content, outer.offsetWidth);
+        let el = outer.querySelector('#loop');
+        el.innerHTML = el.innerHTML + el.innerHTML;
+    }
+}
+
+function repeatContent(el, till) {
+    let html = el.innerHTML;
+    let counter = 0; // prevents infinite loop
+
+    while (el.offsetWidth < till && counter < 100) {
+        el.innerHTML += html;
+        counter += 1;
+    }
+} 

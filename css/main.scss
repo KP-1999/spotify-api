@@ -5,6 +5,7 @@
 
 :root{
     --primary-color: #121212; 
+    --primary-color-lighten: #222222;
     --secondary-color: #666666;
     --text-color: #f9f9f9;
     --text-color-alt: #666666;
@@ -55,7 +56,6 @@ body {
 .detail {
     display: none;
     overflow-x: scroll;
-    
 
     &--back-button {
         position: absolute;
@@ -111,10 +111,29 @@ body {
         &--title{
             display: flex;
             flex-direction: row;
-
+            margin-bottom: 25px;
+            justify-content: space-between;
+ 
             &-left{
-                flex-grow: 1;
+                width: 70%;
 
+                .ellipsis-slide {
+                    overflow: hidden;
+
+                    div{
+                        display: inline-block;
+                    }
+
+                    h1{
+                        padding-right: 60px;
+                    }
+
+                    &--loop{
+                        white-space: nowrap;
+                        animation: loop-anim 25s linear infinite;
+                    }
+                }
+                 
                 .subtext{
                     font-size: 14px;
                     color: var(--secondary-color);
@@ -128,6 +147,11 @@ body {
                 text-decoration: none;
                 color: var(--secondary-color);
                 font-size: 14px;
+                width: 30%;
+
+                span{
+                    text-align: center;
+                }
 
                 .spotify{
                     width: 30px;
@@ -137,12 +161,67 @@ body {
         }
 
         .album-info {
-            margin: 15px 0;
+            margin: 0 0 15px 0;
 
             .sub-info {
                 margin-top: 5px;
                 font-size: 15px;
                 font-weight: 600;
+            }
+        }
+
+        .track-info{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 20px;
+            margin-bottom: 40px;
+
+            &--length{
+                display: flex;
+                flex-direction: column;
+                background-color: var(--primary-color-lighten);
+                border-radius: 3px;
+                align-items: flex-start;
+                padding: 15px;
+                margin-right: 10px;
+                width: 100%;
+            }
+
+            &--popularity{
+                display: flex;
+                flex-direction: column;
+                background-color: var(--primary-color-lighten);
+                border-radius: 3px;
+                align-items: flex-start;
+                padding: 15px;
+                margin-left: 10px;
+                width: 100%;
+            }
+        }
+
+        .track-artists {
+            margin-top: 20px;
+
+            &--artist{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+
+                span{
+                    color: var(--text-color-alt);
+                    font-size: 16px;
+                }
+                
+                .artist-cover{
+                    border-radius: 50%;
+                    margin-bottom: 10px;
+                    width: 90px;
+                    height: 90px;
+                    min-width: 90px;
+                    min-height: 90px;
+                }
             }
         }
 
@@ -495,6 +574,22 @@ body {
     height: 24px;
 }
 
+.text{
+    font-size: 18px;
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.subtext{
+    font-size: 14px;
+    color: var(--secondary-color);
+}
+
+.carousel-cell {
+    width: 33%;
+}
+
+
 @keyframes clickAnim {
     from { transform: scale(1); }
     to { transform: scale(0.95); }
@@ -560,5 +655,14 @@ body {
 
     to {
         opacity: 1;
+    }
+}
+
+@keyframes loop-anim {
+    0% {
+        margin-left: 0;
+    }
+    100% {
+        margin-left: -50% /* This works because of the div between "outer" and "loop" */
     }
 }
