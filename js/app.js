@@ -267,22 +267,53 @@ const UIController = (function(){
             document.querySelector(DOMElements.homePage).classList.add('page-section--active');
         },
 
-        showDetailSection(image, name) {
+        showDetailSection(image, name, releaseDate, spotifyURL) {
             const container = document.querySelector(DOMElements.detailContainer);
             container.innerHTML = '';
 
             const html = 
             `
+                <img onclick="hideDetail()" class="icon detail--back-button" src="assets/img/chevron-left.svg" alt="back-button">
                 <div class="detail-banner">
                     <img class="banner-image" src="${image}" alt="banner"/>
                 </div>
                 <div id="detail-content" class="detail-content">
-                    <h1>${name}</h1>
+                    <div class="detail-content--title">
+                        <div class="detail-content--title-left">
+                            <h1>${name}</h1>
+                            <span class="subtext">${releaseDate}</span>
+                        </div>
+                        <a href="${spotifyURL}" class="detail-content--title-right">
+                            <img class="icon spotify" src="assets/img/spotify.svg" alt="spotify-logo">
+                            <span>Open Spotify</span>
+                        </a>
+                    </div>
                 </div>
             `;
 
             container.insertAdjacentHTML('beforeend', html);
             container.classList.add('detail--show');
+        },
+
+        showTrackInfo(popularity, duration){
+            const container = document.querySelector('#detail-content');
+
+            let html = 
+            `
+                <div class="track-info">
+                    <h3>Info</h3>
+                    <div class="track-info--length">
+                        <span>${duration}</span>
+                        <span>Track Length<span>
+                    </div>
+                    <div class="track-info--popularity">
+                        <span>${popularity}</span>
+                        <span>0-10 Popularity<span>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
         },
 
         showAlbumInfo(label, release, totalTracks, tracks, artist) {
@@ -299,7 +330,7 @@ const UIController = (function(){
 
             tracks.forEach(function(track){
                 html += 
-                    `<div class="track">
+                    `<div class="track" onclick="APPController.showDetail(this);" data-type="track" data-result-href="${track.href}">
                         <span class="track-name">${track.name}</span>
                         <div class="track-artists">`;
 
@@ -325,7 +356,7 @@ const UIController = (function(){
             `
 
             container.insertAdjacentHTML('beforeend', html);
-        }
+        },
     }
 
 })();
@@ -399,17 +430,23 @@ const APPController = (function(UICtrl, APICtrl) {
         // show detail page
         switch(type) {
             case 'track':
-                // const info = 
-                UICtrl.showDetailSection(item.album.images[0].url, item.name);
+                UICtrl.showDetailSection(item.album.images[0].url, item.name, item.album.release_date, item.uri);
+                UICtrl.showTrackInfo((item.popularity / 10), millisToMinutesAndSeconds(item.duration_ms));
             break;
             case 'artist':
                 UICtrl.showDetailSection(item.images[0].url, item.name);
             break;
             case 'album':
-                UICtrl.showDetailSection(item.images[0].url, item.name);
+                UICtrl.showDetailSection(item.images[0].url, item.name, item.label, item.uri);
                 UICtrl.showAlbumInfo(item.label, item.release_date, item.total_tracks, item.tracks.items, item.artists[0].name);
             break;
         }
+    }
+    
+    const millisToMinutesAndSeconds = function(millis){
+        var minutes = Math.floor(millis / 60000);
+        var seconds = ((millis % 60000) / 1000).toFixed(0);
+        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
     }
 
     return {
@@ -427,3 +464,9 @@ const APPController = (function(UICtrl, APICtrl) {
 
 // load
 APPController.init();
+
+function hideDetail(){
+    const detailContainer = document.getElementById('detailContainer')
+    detailContainer.classList.remove("detail--show");
+    detailContainer.classList.add("detail--hide");
+}

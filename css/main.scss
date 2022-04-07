@@ -55,11 +55,36 @@ body {
 .detail {
     display: none;
     overflow-x: scroll;
+    
+
+    &--back-button {
+        position: absolute;
+        z-index: 9999;
+        width: 35px;
+        height: 35px;
+        left: 25px;
+        top: 25px; 
+
+        &:hover{
+            cursor: pointer;
+        }
+    }
+
+    &--hide{
+        display: block;
+        position: absolute;
+        z-index: 9998;
+        width: 100%;
+        height: 100%;
+        animation: slideDown 0.6s forwards;;
+        background-color: var(--primary-color);
+        top: 0;
+    }
 
     &--show{
         display: block;
         position: absolute;
-        z-index: 800;
+        z-index: 9998;
         width: 100%;
         height: 100%;
         animation: slideUp 0.6s;
@@ -81,7 +106,35 @@ body {
 
     &-content {
         margin: 0 25px;
-        padding-bottom: 100px;
+        padding-bottom: 25px;
+
+        &--title{
+            display: flex;
+            flex-direction: row;
+
+            &-left{
+                flex-grow: 1;
+
+                .subtext{
+                    font-size: 14px;
+                    color: var(--secondary-color);
+                }
+            }
+
+            &-right{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-decoration: none;
+                color: var(--secondary-color);
+                font-size: 14px;
+
+                .spotify{
+                    width: 30px;
+                    height: 30px;
+                }
+            }
+        }
 
         .album-info {
             margin: 15px 0;
@@ -421,11 +474,6 @@ body {
         align-items: center;
         text-decoration: none;
         transition: color .2s ease;
-
-        .icon{
-            width: 24px;
-            height: 24px;
-        }
         
         .title{
             margin-top: 5px;
@@ -440,6 +488,11 @@ body {
             }
         }
     }
+}
+
+.icon{
+    width: 24px;
+    height: 24px;
 }
 
 @keyframes clickAnim {
@@ -466,6 +519,17 @@ body {
 
     to {
         transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from { 
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(200%);
+        display: none;
     }
 }
 
