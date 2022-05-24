@@ -404,7 +404,7 @@ body {
         }   
     }
 
-    .page-section--search {
+    .page-section--search, .page-section--releases {
 
         .page-taskbar{
             position: relative;
@@ -489,12 +489,10 @@ body {
             animation: appear 0.3s;
 
             .result-cover{
+                min-width: calc((100% / 4) - 20px);
                 width: calc((100% / 4) - 20px);
-                height: 100%;
                 object-fit: cover;
                 border-radius: 3px;
-                min-width: 60px;
-                min-height: 60px;
                 aspect-ratio: 1/1;
 
                 &--artist{
@@ -518,6 +516,15 @@ body {
     
                 .result-artist{
                     margin-top: 3px;
+                    color: var(--text-color-alt);
+                    font-size: 14px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+
+                .result-date{
+                    margin-bottom: 3px;
                     color: var(--text-color-alt);
                     font-size: 14px;
                     overflow: hidden;

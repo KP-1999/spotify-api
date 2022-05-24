@@ -5,7 +5,7 @@ const APIController = (function() {
     const clientId = 'd204445db1884dbf8da85b731b931ef6';
     const clientSecret = '9fd64ab42a2449f7af0422e22ffc5193';
     const redirectUrl = 'http://localhost:3000/';
-    // const redirectUrl = 'https://i436839.hera.fhict.nl/';
+    //const redirectUrl = 'https://i436839.hera.fhict.nl/';
     const auth = 'https://accounts.spotify.com/authorize?';
 
     // private method get token
@@ -150,6 +150,87 @@ const APIController = (function() {
         return data;
     };
 
+    const _getUserFollowedArtist = async (token) => {
+        // get user followed artist 
+        const limit = 50;
+        const result = await fetch(`https://api.spotify.com/v1/me/following?type=artist&limit=${limit}`, {
+            method: 'GET',
+            headers: { 'Authorization' : 'Bearer ' + token }
+        });
+
+        if(result.status == 403){
+            _refreshToken(localStorage.getItem('refresh_token'));
+            _getDetail(token, trackEndPoint);
+        }
+
+        const data = await result.json();
+        return data.artists.items;
+    }
+
+    const _getNewReleasesArtist = async (token, artistId) => {
+        // get artists latests releases 
+        const result = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album,single,appears_on`, {
+            method: 'GET',
+            headers: { 'Authorization' : 'Bearer ' + token }
+        });
+
+        if(result.status == 403){
+            _refreshToken(localStorage.getItem('refresh_token'));
+            _getDetail(token, trackEndPoint);
+        }
+
+        const data = await result.json();
+        return data.items;
+    }
+
+    const _getDateDifference = async (date1, date2) => {
+        const diffInMs = Math.abs(date2 - date1);
+        return diffInMs / (1000 * 60 * 60 * 24);
+    }
+
+    // private method get new releases
+    const _getNewReleases = async (token) => {
+        // get user followed artist 
+        const followedArtists = await _getUserFollowedArtist(token);
+        
+        const latestReleases = [];
+        await Promise.all(followedArtists.map(async (fa) => {
+            latestReleases.push( await _getNewReleasesArtist(token, fa.id) );
+        }));
+
+        // filter array
+        var filteredReleases = [];
+        var today = new Date();
+        await Promise.all(latestReleases.map(async (lr) => {
+            await Promise.all(lr.map(async (r) => {
+                const releaseDate = new Date(r.release_date.replace(/-/g, '/'))
+                const dateDiff = await _getDateDifference(releaseDate, today);
+                if (dateDiff < 21 && r.album_type != 'compilation'){
+                    r.date_diff = dateDiff;
+                    filteredReleases.push(r)
+                }
+            }))
+        }))
+
+        // sort array on date
+        const sortedReleases = filteredReleases.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+
+        // filter dups
+        const removedDups = sortedReleases.reduce((acc, current) => {
+            const x = acc.find(item => item.name === current.name);
+            if (!x) {
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
+
+        console.log(removedDups);
+
+
+        return removedDups;
+    };
+
     return {
         getToken(code) {
             return _getToken(code);
@@ -177,6 +258,9 @@ const APIController = (function() {
         },
         getArtistsOfTrack(token, ids) {
             return _getArtistsOfTrack(token, ids);
+        },
+        getNewReleases(token) {
+            return _getNewReleases(token);
         }
     }
 
@@ -196,7 +280,8 @@ const UIController = (function(){
         homePage: '#home',
         getDetail: '.get-detail',
         detailContainer: '#detailContainer',
-        greetingContainer: '#greeting'
+        greetingContainer: '#greeting',
+        newReleases: '#newReleases'
     }
 
     // public method
@@ -210,17 +295,34 @@ const UIController = (function(){
 
         containerEl(){
             return {
-                getDetail: DOMElements.getDetail
+                getDetail: DOMElements.getDetail,
+                newReleases: DOMElements.newReleases
             }
         },
 
-        createSearchResult(img, title, artist, type, href){
-            const container = document.querySelector(DOMElements.resultContainer);
+        createSearchResult(img, title, artist, type, href, htmlContainer){
+            const container = document.querySelector(DOMElements[htmlContainer]);
             const html = 
             `  
                 <div onclick="APPController.showDetail(this);" data-type="${type}" data-result-href="${href}" class="result get-detail">
                     <img class="result-cover result-cover--${type}" src="${img}" alt="cover"/>
                     <div class="result-info">
+                        <span class="result-title">${title}</span>
+                        <span class="result-artist">${artist}</span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        },
+
+        createReleases(img, title, artist, type, href, date, daysago, htmlContainer){
+            const container = document.querySelector(DOMElements[htmlContainer]);
+            const html = 
+            `  
+                <div onclick="APPController.showDetail(this);" data-type="${type}" data-result-href="${href}" class="result get-detail">
+                    <img class="result-cover result-cover--${type}" src="${img}" alt="cover"/>
+                    <div class="result-info">
+                        <span class="result-date">${Math.floor(daysago)} days ago</span>
                         <span class="result-title">${title}</span>
                         <span class="result-artist">${artist}</span>
                     </div>
@@ -279,6 +381,10 @@ const UIController = (function(){
             `;
 
             container.insertAdjacentHTML('beforeend', html);
+        },
+
+        createNewReleases(name, date, image) {
+
         },
 
         showHomeScreen() {
@@ -396,6 +502,11 @@ const UIController = (function(){
 
             container.insertAdjacentHTML('beforeend', html);
         },
+
+        showNewReleases() {
+
+        },
+
     }
 
 })();
@@ -419,6 +530,8 @@ const APPController = (function(UICtrl, APICtrl) {
             const topTracks = await APICtrl.getTopTrackOrArtist(token, 'track');
             // get top artist
             const topArtists = await APICtrl.getTopTrackOrArtist(token, 'artist');
+            // get new releases
+            const newReleases = await APICtrl.getNewReleases(token);
     
             // show greeting
             UICtrl.showGreeting();
@@ -431,6 +544,9 @@ const APPController = (function(UICtrl, APICtrl) {
     
             // show homescreen
             UICtrl.showHomeScreen();
+
+            // show new releases 
+            newReleases.forEach(element => UICtrl.createReleases(element.images[0].url, element.name, element.artists[0].name, element.type, element.href, element.release_date, element.date_diff, 'newReleases'));
         }
     }
 
@@ -447,13 +563,13 @@ const APPController = (function(UICtrl, APICtrl) {
 
         switch(filter) {
             case 'track':
-                searchData.forEach(element => UICtrl.createSearchResult(element.album.images[0].url, element.name, element.artists[0].name, filter, element.href));
+                searchData.forEach(element => UICtrl.createSearchResult(element.album.images[0].url, element.name, element.artists[0].name, filter, element.href, 'resultContainer'));
             break;
             case 'artist':
-                searchData.forEach(element => UICtrl.createSearchResult(element.images[0].url, element.name, '', filter, element.href));
+                searchData.forEach(element => UICtrl.createSearchResult(element.images[0].url, element.name, '', filter, element.href, 'resultContainer'));
             break;
             case 'album':
-                searchData.forEach(element => UICtrl.createSearchResult(element.images[0].url, element.name, element['release_date'].substring(0,4), filter, element.href));
+                searchData.forEach(element => UICtrl.createSearchResult(element.images[0].url, element.name, element['release_date'].substring(0,4), filter, element.href, 'resultContainer'));
             break;
         }
     });
@@ -497,7 +613,11 @@ const APPController = (function(UICtrl, APICtrl) {
         },
 
         showDetail(e){
-            showDetail(e)   
+            showDetail(e)
+        },
+
+        showNewReleases(e){
+            showNewReleases(e)
         }
     }
     

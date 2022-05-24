@@ -496,7 +496,7 @@ body {
   text-overflow: ellipsis;
 }
 
-.page-content .page-section--search .page-taskbar {
+.page-content .page-section--search .page-taskbar, .page-content .page-section--releases .page-taskbar {
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -507,14 +507,14 @@ body {
           flex-direction: column;
 }
 
-.page-content .page-section--search .page-taskbar .search-bar {
+.page-content .page-section--search .page-taskbar .search-bar, .page-content .page-section--releases .page-taskbar .search-bar {
   position: relative;
   width: 100%;
   margin-top: 15px;
   height: 40px;
 }
 
-.page-content .page-section--search .page-taskbar .search-bar .search-input {
+.page-content .page-section--search .page-taskbar .search-bar .search-input, .page-content .page-section--releases .page-taskbar .search-bar .search-input {
   position: relative;
   height: inherit;
   width: inherit;
@@ -528,7 +528,7 @@ body {
   line-height: 14px;
 }
 
-.page-content .page-section--search .page-taskbar .search-bar .search-icon {
+.page-content .page-section--search .page-taskbar .search-bar .search-icon, .page-content .page-section--releases .page-taskbar .search-bar .search-icon {
   position: absolute;
   left: 10px;
   top: 10px;
@@ -536,7 +536,7 @@ body {
   height: 20px;
 }
 
-.page-content .page-section--search .page-taskbar .filter {
+.page-content .page-section--search .page-taskbar .filter, .page-content .page-section--releases .page-taskbar .filter {
   margin-top: 10px;
   margin-bottom: 20px;
   position: relative;
@@ -549,7 +549,7 @@ body {
           flex-direction: row;
 }
 
-.page-content .page-section--search .page-taskbar .filter .filter-type {
+.page-content .page-section--search .page-taskbar .filter .filter-type, .page-content .page-section--releases .page-taskbar .filter .filter-type {
   width: auto;
   padding: 5px 10px;
   border: 1.5px solid var(--secondary-color);
@@ -560,12 +560,12 @@ body {
   transition: background-color .1s ease-in-out, border-color .1s ease-in-out;
 }
 
-.page-content .page-section--search .page-taskbar .filter .filter-type--clicked {
+.page-content .page-section--search .page-taskbar .filter .filter-type--clicked, .page-content .page-section--releases .page-taskbar .filter .filter-type--clicked {
   -webkit-animation: clickAnim .2s;
           animation: clickAnim .2s;
 }
 
-.page-content .page-section--search .page-taskbar .filter .filter-type--active {
+.page-content .page-section--search .page-taskbar .filter .filter-type--active, .page-content .page-section--releases .page-taskbar .filter .filter-type--active {
   background-color: var(--highlight-color);
   border-color: var(--hightlight-color-lighten);
 }
@@ -602,13 +602,11 @@ body {
 }
 
 .page-content .results .result .result-cover {
+  min-width: calc((100% / 4) - 20px);
   width: calc((100% / 4) - 20px);
-  height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
   border-radius: 3px;
-  min-width: 60px;
-  min-height: 60px;
   aspect-ratio: 1/1;
 }
 
@@ -638,6 +636,15 @@ body {
 
 .page-content .results .result .result-info .result-artist {
   margin-top: 3px;
+  color: var(--text-color-alt);
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.page-content .results .result .result-info .result-date {
+  margin-bottom: 3px;
   color: var(--text-color-alt);
   font-size: 14px;
   overflow: hidden;
