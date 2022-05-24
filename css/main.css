@@ -496,6 +496,10 @@ body {
   text-overflow: ellipsis;
 }
 
+.page-content .page-section--releases .releases {
+  margin-top: 20px;
+}
+
 .page-content .page-section--search .page-taskbar, .page-content .page-section--releases .page-taskbar {
   position: relative;
   display: -webkit-box;
